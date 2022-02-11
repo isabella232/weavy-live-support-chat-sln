@@ -2,6 +2,7 @@
 @{
     Layout = null;
     BodyAttributes.Add("class", "dual");
+    var isAgent = WeavyContext.Current.User.IsInRole("Agent");
     if (Model.ConversationId == null) {
         BodyAttributes.Add("class", "one");
     } else {
@@ -29,7 +30,10 @@
     <script>@Html.ContextInfo()@Html.UserSettings()</script>
     <div class="pane" id="sidebar">
         <header class="pane-header">
-            <button type="button" class="btn btn-primary btn-icon" data-toggle="modal" data-target="#new-message-modal" title="@T["New message"]">@Svg.Icon("message-plus")</button>
+            @if (isAgent)
+            {
+                <button type="button" class="btn btn-primary btn-icon" data-toggle="modal" data-target="#new-message-modal" title="@T["New message"]">@Svg.Icon("message-plus")</button>
+            }
             <div class="pane-title text-truncate"><a href="@(Url.Action<MessengerController>(c => c.Index(null)))">@(IsEmbedded ? T["Conversations"].ToString() : T["Messenger"].ToString())</a></div>
             <button type="button" class="btn btn-icon dropdown-toggle top-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@Svg.Icon("dots-vertical")</button>
             <div class="dropdown-menu dropdown-menu-right">
@@ -47,6 +51,15 @@
                     <button type="button" class="btn btn-icon btn-reset">@Svg.Spinner(size: 18, spin: true)@Svg.Icon("close")</button>
                 </div>
             </form>
+            @if (isAgent)
+            {
+                <div class="convo-view-btns">
+                    <button class="open-tickets-btn btn btn-outline-secondary active">Open Tickets</button>
+                    <button class="unclaimed-tickets-btn btn btn-outline-secondary">Unclaimed Tickets</button>
+                    <button class="closed-tickets-btn btn btn-outline-secondary">Closed Tickets</button>
+                </div>
+
+            }
             <nav class="list-group" id="conversations">
                 @{ Html.RenderPartial("_Conversations", Model); }
             </nav>
@@ -67,7 +80,9 @@
         <main id="main" class="pane conversation @(Model.Conversation.IsRoom ? " room" : "")@(Model.Conversation.IsPinned ? " pinned" : "")@(Model.Conversation.IsStarred() ? " starred" : "")@(Model.Conversation.IsRead ? "" : " unread")" data-id="@Model.Conversation.Id">
             <header class="pane-header">
                 <div class="pane-actions">
-                    <a href="@(Url.Action<MessengerController>(c => c.Index(null)))" class="btn btn-primary btn-icon btn-back">@Svg.Icon("arrow-left")</a>
+                    @if (isAgent) { 
+                        <a href="@(Url.Action<MessengerController>(c => c.Index(null)))" class="btn btn-primary btn-icon btn-back">@Svg.Icon("arrow-left")</a>
+                    }
                     @if (WeavyContext.Browser.Mobile) {
                         <span class="badge badge-danger text-truncate">@(Model.Unread > 0 ? Model.Unread.ToString() : "")</span>
                     }
@@ -95,6 +110,7 @@
         </main>
         Html.RenderPartial("_ScrollbarsInit");
         Html.RenderPartial("_InfoModal", Model.Conversation);
+        Html.RenderPartial("_FeedbackModal", Model.Conversation);
         Html.RenderPartial("_ProfileModal");
         Html.RenderPartial("_PeopleModal", Model);
     }

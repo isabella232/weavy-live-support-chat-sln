@@ -141,7 +141,7 @@ wvy.messenger = (function ($) {
 
     function initTextarea() {
         var typing;
-
+        
         // enable fieldset
         var $fieldset = $(".message-form fieldset").prop("disabled", false);
 
@@ -326,7 +326,7 @@ wvy.messenger = (function ($) {
         //} else {
         //    console.log(e.type, e.data.url);
         //}
-
+        $(".conversation.open").removeClass("d-none");
         var $main = $("#main");
         if ($main.length) {
             // set current conversation
@@ -470,6 +470,12 @@ wvy.messenger = (function ($) {
             //case "archive":
             //    // TODO: 
             //    break;
+            case "close-ticket":
+                closeTicket(this.dataset.id);
+                break;
+            case "claim-ticket":
+              claimTicket(this.dataset.id);
+              break;
             case "leave":
                 leave(this.dataset.id);
                 break;
@@ -896,6 +902,35 @@ wvy.messenger = (function ($) {
         });
     });
 
+  //Support Chat
+  $(document).on("click", ".convo-view-btns button", function () {
+    $(".convo-view-btns button").removeClass("active");
+    $(this).addClass("active");
+    $(".list-group-item.conversation:not(.d-none)").addClass("d-none");
+    if ($(this).hasClass("unclaimed-tickets-btn")) {
+      $(".conversation.unclaimed").removeClass("d-none");
+    } else if ($(this).hasClass("closed-tickets-btn")) {
+      $(".conversation.closed").removeClass("d-none");
+    } else {
+      $(".conversation.open").removeClass("d-none");
+    }
+  });
+
+  // add feedback conversation
+  $(document).on("submit", "#feedback-form", function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    $.post({
+      url: $form.attr("action"),
+      data: $form.serialize()
+    }).then(() => {
+      wvy.postal.postToParent({name: "feedback-sent"});
+    }).fail(function (xhr, status, error) {
+      console.error(error);
+    }).always(function () {
+      $("#feedback-modal").modal("hide");
+    });
+  });
     ////////// Realtime events //////////
 
     // reload after reconnect to get fresh data
@@ -920,6 +955,7 @@ wvy.messenger = (function ($) {
 
     // update gui because a message was received
     wvy.connection.default.on("message-inserted.weavy", function (event, message) {
+      if (message.name === "closed-ticket") return;
         console.debug("received message " + message.id + " in conversation " + message.conversation);
 
         if (message.createdBy.id !== wvy.context.user) {
@@ -1274,6 +1310,36 @@ wvy.messenger = (function ($) {
         } else {
             wvy.turbolinks.visit(url, null, "POST")
         }
+    }
+
+    function closeTicket(id) {
+      var url = wvy.url.resolve(_prefix + "/c/" + id + "/close-ticket");
+      if (document.body.classList.contains("single") && document.body.classList.contains("two")) {
+
+        // make ajax request to close ticket
+        $.post(url);
+
+        // and remove all modals, but keep the .modal-backdrop as an indicator that we have left the conversation
+        $(".modal").remove();
+
+      } else {
+        wvy.turbolinks.visit(url, null, "POST")
+      }
+  }
+
+    function claimTicket(id) {
+      var url = wvy.url.resolve(_prefix + "/c/" + id + "/claim-ticket");
+      if (document.body.classList.contains("single") && document.body.classList.contains("two")) {
+
+        // make ajax request to close ticket
+        $.post(url);
+
+        // and remove all modals, but keep the .modal-backdrop as an indicator that we have left the conversation
+        $(".modal").remove();
+
+      } else {
+        wvy.turbolinks.visit(url, null, "POST")
+      }
     }
 
     // get the closest ancestor element that is scrollable (adapted from https://stackoverflow.com/a/42543908/891843)

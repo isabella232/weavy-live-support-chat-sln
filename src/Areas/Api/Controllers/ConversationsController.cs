@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
+using NLog;
 using Weavy.Core;
 using Weavy.Core.Localization;
 using Weavy.Core.Models;
@@ -21,6 +22,7 @@ namespace Weavy.Areas.Api.Controllers {
     [RoutePrefix("api")]
     public class ConversationsController : WeavyApiController {
 
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly StringLocalizer T = StringLocalizer.CreateInstance();
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace Weavy.Areas.Api.Controllers {
             // create new room or one-on-one conversation or get the existing one
             return Ok(ConversationService.Insert(new Conversation() { Name = name }, model.Members));
         }
-
+        
         /// <summary>
         /// Get the messages in the specified conversation.
         /// </summary>
