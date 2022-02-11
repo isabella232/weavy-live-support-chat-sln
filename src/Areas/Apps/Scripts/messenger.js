@@ -955,7 +955,6 @@ wvy.messenger = (function ($) {
 
     // update gui because a message was received
     wvy.connection.default.on("message-inserted.weavy", function (event, message) {
-      if (message.name === "closed-ticket") return;
         console.debug("received message " + message.id + " in conversation " + message.conversation);
 
         if (message.createdBy.id !== wvy.context.user) {
