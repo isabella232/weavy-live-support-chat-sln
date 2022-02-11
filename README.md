@@ -1,7 +1,6 @@
 # Weavy Solution
 
 Visual Studio solution for [Weavy](https://www.weavy.com). See https://docs.weavy.com for [getting started](https://docs.weavy.com/sdk/server/get-started) instructions.
-This repo contains the Weavy Solution SDK for the Live Support Chat Example. The Client solution can be found [here](https://github.com/weavy/weavy-live-support-chat-client)
 
 ## Live Support Chat
 
